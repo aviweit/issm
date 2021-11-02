@@ -131,6 +131,7 @@ Update access info for:
 * ISSM kafka bus
 * Datalake kafka bus
 * Smart resource and service discovery
+* Argo server ip and port
 
 ```
                 arguments:
@@ -147,6 +148,8 @@ Update access info for:
                     value: 172.28.3.42
                   - name: discovery_port
                     value: 32000
+                  - name: argo_server
+                    value: 10.43.204.81:2746
 ```
 
 then, onboard the flow
@@ -160,7 +163,8 @@ kubectl apply -f flows/issm-sensor.yaml -n $MNO_NAMESPACE
 Deploy common and orchestration libraries
 
 ```
-kubectl apply -f wf-templates/intent.yaml -n $MNO_NAMESPACE
+kubectl apply -f wf-templates/submit.yaml -n $MNO_NAMESPACE
+kubectl apply -f wf-templates/list.yaml -n $MNO_NAMESPACE
 kubectl apply -f wf-templates/orchestration.yaml -n $MNO_NAMESPACE
 kubectl apply -f wf-templates/base.yaml -n $MNO_NAMESPACE
 kubectl apply -f wf-templates/slice.yaml -n $MNO_NAMESPACE

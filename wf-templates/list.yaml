@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: list-template
+spec:
+  templates:
+  - name: handle-list
+    steps:
+    - - name: list-workflows
+        template: list
+        arguments:
+          parameters:
+          - name: namespace
+            value: "domain-{{workflow.parameters.service_owner}}"
+
+    - - name: publish
+        templateRef:
+          name: workflow-base
+          template: publish-on-kafka
+        arguments:
+          parameters:
+          - name: data
+            value: |
+              {
+                "items": {{steps.list-workflows.outputs.result}},
+                "event_uuid": "{{workflow.name}}"
+              }
+          - name: kafka_topic
+            value: "issm-out-domain-{{workflow.parameters.service_owner}}"
+
+  - name: list
+    inputs:
+      parameters:
+      - name: namespace
+    script:
+      image: docker.pkg.github.com/5gzorro/issm/python:alpine3.6-kafka-v0.1
+      imagePullPolicy: IfNotPresent
+      command: [python]
+      source: |
+        import json
+        import requests
+        import sys
+
+        headers = {'Content-Type': 'application/json'}
+        r = requests.get("http://{{workflow.parameters.argo_server}}/api/v1/workflows/{{inputs.parameters.namespace}}", headers=headers)
+        r_json = r.json()
+        ret = []
+        for i in r_json['items']:
+            if i['metadata']['labels'].get('operation') == 'submit':
+                ret.append(dict(name=i['metadata']['name'], transaction_uuid=i['metadata']['labels']['transaction_uuid'], phase=i['status']['phase']))
+        json.dump(ret, sys.stdout)
+                
+        #curl -X GET http://{{workflow.parameters.argo_server}}/api/v1/workflows/{{inputs.parameters.namespace}} | jq -r .items[0].status.phase

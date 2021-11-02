@@ -1,6 +1,6 @@
 # issm-api
 
-Component responsible for providing management API endpoint service for ISSM.
+[TODO]
 
 ## Deploy the service
 
@@ -12,57 +12,48 @@ Invoke the below in this order
 
 1. you may need to update below settings according to your environment
 
-1. deployment uses myregistrykey secrete to pull image from private docker registry. Refer [here](https://github.com/5GZORRO/infrastructure/blob/master/docs/kubernetes-private-dockerregistry.md) to set it up
-
-1. ensure to create the secrete in `issm` namespace
-
 ```
-export REGISTRY=docker.pkg.github.com
-export IMAGE=$REGISTRY/5gzorro/issm/issm-api:c065565
-
 export ISSM_KAFKA_HOST=172.28.3.196
 export ISSM_KAFKA_PORT=9092
 ```
 
-```
-envsubst < deploy/deployment.yaml.template | kubectl apply -n issm -f -
-kubectl apply -f deploy/service.yaml -n issm
-```
-
 ## API
+
+### submit
 
 Submit slice intent to ISSM kafka bus
 
+`./kafka-console-producer.sh --topic issm-domain-operator-a --bootstrap-server $ISSM_KAFKA_HOST:$ISSM_KAFKA_PORT`
+
 ```
-curl -H "Content-type: application/json" -POST -d '{"service_owner": "<service_owner>", "intent": {..}}' http://issm_api_ip_address:8080/instantiate
-
-REST path:
-    issm_api_ip_address - ipaddress ISSM API service.
-
 Data payload:
-    service_owner      - the id of the service owner/tenant to perform this request (str)
-    intent             - the intent to be submitted (json)
-        requested_price  - price of the resource (range e.g. "15-25")
-        latitude       - the desired location of the slice/resource
-        longitude      - the desired location of the slice/resource
-        resourceSpecCharacteristic - the type of the resource (e.g, "CDN")
-        category       - category (e.g "vnf")
-        qos_parameters - (json - e.g. {"users": "10"})
-        service_id     - existing vertical service id to extend (e.g. "23")
+    service_owner               - the id of the service owner to perform this request (str)
+    operation                   - the operation to perform (submit) (str)
+    sub_operation               - should be set with new_intent (str)
+    requested_price             - price of the resource (range e.g. "15-25") (str)
+    latitude                    - the desired location of the slice/resource (str)
+    longitude                   - the desired location of the slice/resource (str)
+    resourceSpecCharacteristic  - the type of the resource (e.g, "CDN") (str)
+    category                    - category (e.g "vnf") (str)
+    qos_parameters              - (json - e.g. {"users": "10"}) (json)
+    service_id                  - existing vertical service id to extend (e.g. "23") (str)
 
-Return:
-    status - 200
-    transaction_uuid - the transaction uuid of this business flow instance
+Other parameters:
+    bootstrap-server - ipaddress kafka broker.
 ```
 
 Invocation example:
 
 ```
-curl -H "Content-type: application/json" -POST -d '{"service_owner": "operator-a", "intent": {"requested_price": "15-25", "latitude": "43", "longitude": "10", "resourceSpecCharacteristic": "CDN", "category": "vnf", "qos_parameters": {"users": "10"}, "service_id": "23" }}' http://172.28.3.42:30080/instantiate
+{"event_uuid": "123", "transaction_uuid": "123", "operation": "submit", "sub_operation": "new_intent", "service_owner": "operator-a", "requested_price": "15-25", "latitude": "43", "longitude": "10", "resourceSpecCharacteristic": "CDN", "category": "vnf", "qos_parameters": {"users": "10"}, "service_id": "23"}
+```
 
-{
-  "transaction_uuid": "cc0bb0e0fe214705a9222b4582f17961"
-}
+### list
+
+List business flows for a given service provider
+
+```
+{"event_uuid": "456", "operation": "list", "service_owner": "operator-a"}
 ```
 
 ## Build (**relevant for developers only**)
