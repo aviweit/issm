@@ -110,6 +110,8 @@ kubectl apply -n $MNO_NAMESPACE -f https://raw.githubusercontent.com/argoproj/ar
 
 ### Create MNO kafka event source for ISSM bus
 
+Connect kafka event source to the operator input topic
+
 Update ISSM kafka ip and port settings per your environment
 
 ```
