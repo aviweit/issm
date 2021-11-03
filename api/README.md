@@ -39,6 +39,7 @@ Data payload:
     service_id                  - existing vertical service id to extend (e.g. "23") (str)
 
 Other parameters:
+    topic            - issm input topic for this service owner e.g. issm-in-operator-a
     bootstrap-server - ipaddress kafka broker.
 ```
 
@@ -52,8 +53,34 @@ Invocation example:
 
 List business flows for a given service provider
 
+Send the request:
+
+`./kafka-console-producer.sh --topic issm-domain-operator-a --bootstrap-server $ISSM_KAFKA_HOST:$ISSM_KAFKA_PORT`
+
+```
+Data payload:
+    service_owner    - the id of the service owner to perform this request (str)
+    operation        - the operation to perform (list) (str)
+
+Other parameters:
+    topic            - issm input topic for this service owner e.g. issm-in-operator-a
+    bootstrap-server - ipaddress kafka broker.
+```
+
+Payload example:
+
 ```
 {"event_uuid": "456", "operation": "list", "service_owner": "operator-a"}
+```
+
+Consume the response
+
+`./kafka-console-consumer.sh --bootstrap-server 172.28.3.196:9092 --topic issm-out-domain-operator-a --from-beginning`
+
+Response example
+
+```
+{"items": [{"name": "84979a2c612d4cb2a45c48c6c7a9b8b2", "transaction_uuid": "123", "phase": "Succeeded"}, {"name": "39b2b25fea354eeb9558445e35a3aceb", "transaction_uuid": "123", "phase": "Succeeded"}, {"name": "123", "transaction_uuid": "123", "phase": "Succeeded"}], "event_uuid": "456"}
 ```
 
 ## Build (**relevant for developers only**)

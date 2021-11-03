@@ -110,10 +110,10 @@ export KAFKA_HOST=172.28.3.196
 export KAFKA_PORT=9092
 ```
 
-**Note:** ensure to define topic with `issm-` prefix
+**Note:** ensure to define topic with `issm-in-` prefix
 
 ```
-export ISSM_DOMAIN_TOPIC=issm-$MNO_NAMESPACE
+export ISSM_DOMAIN_TOPIC=issm-in-$MNO_NAMESPACE
 envsubst < deploy/kafka-event-source.yaml.template | kubectl apply -n $MNO_NAMESPACE -f -
 ```
 
