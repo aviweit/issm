@@ -28,7 +28,7 @@ spec:
                 "event_uuid": "{{workflow.name}}"
               }
           - name: kafka_topic
-            value: "issm-out-domain-{{workflow.parameters.service_owner}}"
+            value: "issm-out-{{workflow.parameters.service_owner}}"
 
   - name: list
     inputs:
@@ -50,9 +50,4 @@ spec:
 
         r_json = r.json()
         ret = []
-        #for i in r_json['items']:
-        #    if i['metadata']['labels'].get('operation') == 'submit':
-        #        ret.append(dict(name=i['metadata']['name'], transaction_uuid=i['metadata']['labels']['transaction_uuid'], phase=i['status']['phase']))
         json.dump(r_json, sys.stdout)
-                
-        #curl -X GET http://{{workflow.parameters.argo_server}}/api/v1/workflows/{{inputs.parameters.namespace}} | jq -r .items[0].status.phase

@@ -23,10 +23,11 @@ export ISSM_KAFKA_PORT=9092
 
 Submit slice intent to ISSM kafka bus
 
-`./kafka-console-producer.sh --topic issm-domain-operator-a --bootstrap-server $ISSM_KAFKA_HOST:$ISSM_KAFKA_PORT`
+`./kafka-console-producer.sh --topic issm-in-operator-a --bootstrap-server $ISSM_KAFKA_HOST:$ISSM_KAFKA_PORT`
 
 ```
 Data payload:
+    event_uuid                  - unique identifier for this request (uuid)
     service_owner               - the id of the service owner to perform this request (str)
     operation                   - the operation to perform (submit) (str)
     sub_operation               - should be set with new_intent (str)
@@ -53,12 +54,13 @@ Invocation example:
 
 List business flows for a given service provider
 
-Send the request:
+Send the request to input topic:
 
-`./kafka-console-producer.sh --topic issm-domain-operator-a --bootstrap-server $ISSM_KAFKA_HOST:$ISSM_KAFKA_PORT`
+`./kafka-console-producer.sh --topic issm-in-operator-a --bootstrap-server $ISSM_KAFKA_HOST:$ISSM_KAFKA_PORT`
 
 ```
 Data payload:
+    event_uuid       - unique identifier for this request (uuid)
     service_owner    - the id of the service owner to perform this request (str)
     operation        - the operation to perform (list) (str)
 
@@ -73,9 +75,9 @@ Payload example:
 {"event_uuid": "456", "operation": "list", "service_owner": "operator-a"}
 ```
 
-Consume the response
+Consume the response from output topic:
 
-`./kafka-console-consumer.sh --bootstrap-server 172.28.3.196:9092 --topic issm-out-domain-operator-a --from-beginning`
+`./kafka-console-consumer.sh --topic issm-out-operator-a --from-beginning --bootstrap-server $ISSM_KAFKA_HOST:$ISSM_KAFKA_PORT`
 
 Response example
 

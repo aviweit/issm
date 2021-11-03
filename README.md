@@ -68,6 +68,13 @@ Log into MNO kuberneters master
 
 Assuming MNO is called `operator-a`
 
+export it
+
+```
+export MNO_NAME=operator-a
+```
+
+
 **Note:** ensure to define namespace with `domain-` prefix
 
 ```
@@ -113,7 +120,7 @@ export KAFKA_PORT=9092
 **Note:** ensure to define topic with `issm-in-` prefix
 
 ```
-export ISSM_DOMAIN_TOPIC=issm-in-$MNO_NAMESPACE
+export ISSM_DOMAIN_TOPIC=issm-in-$MNO_NAME
 envsubst < deploy/kafka-event-source.yaml.template | kubectl apply -n $MNO_NAMESPACE -f -
 ```
 
@@ -172,7 +179,7 @@ kubectl apply -f wf-templates/slice.yaml -n $MNO_NAMESPACE
 
 ## Trigger ISSM business flow
 
-Follow the guidelines [here](https://github.com/5GZORRO/issm/tree/master/api#api)
+Follow the guidelines [here](./api/README.md#api)
 
 then watch business flow progress with Argo GUI (`http://<kubernetes master ipaddress>:2746`) running on the participated MNOs
 
