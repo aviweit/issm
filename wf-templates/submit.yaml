@@ -31,16 +31,8 @@ spec:
             value: "{{workflow.parameters.discovery_ip}}"
           - name: service_port
             value: "{{workflow.parameters.discovery_port}}"
-          - name: resourceSpecCharacteristic
-            value: "{{workflow.parameters.resourceSpecCharacteristic}}"
-          - name: category
-            value: "{{workflow.parameters.category}}"
-          - name: latitude
-            value: "{{workflow.parameters.latitude}}"
-          - name: longitude
-            value: "{{workflow.parameters.longitude}}"
-          - name: requested_price
-            value: "{{workflow.parameters.requested_price}}"
+          - name: intent_query
+            value: "{{workflow.parameters.intent_query}}"
 
       - name: send-resouces-to-optimizer
         # publish discovered resources for the optimizer to consume
@@ -176,11 +168,7 @@ spec:
       parameters:
       - name: service_ip
       - name: service_port
-      - name: resourceSpecCharacteristic
-      - name: category
-      - name: latitude
-      - name: longitude
-      - name: requested_price
+      - name: intent_query
     script:
       image: docker.pkg.github.com/5gzorro/issm/python:alpine3.6-kafka-v0.1
       imagePullPolicy: IfNotPresent
@@ -195,7 +183,7 @@ spec:
         requested_price = str("{{inputs.parameters.requested_price}}")
         price = requested_price.split('-')[0]
         headers = {'Content-Type': 'application/json'}
-        intent_query = urllib.parse.quote('3 CORES 12288 mb of RAM edge')
+        intent_query = urllib.parse.quote('{{inputs.parameters.intent_query}}')
         r = requests.get("http://{{inputs.parameters.service_ip}}:{{inputs.parameters.service_port}}/intent/" + intent_query, headers=headers)
         # return offers
         # TODO: workshop HACK
@@ -271,8 +259,7 @@ spec:
                   "operation": "{{workflow.parameters.operation}}", "sub_operation": "submit_orchestration",
                   "resource_vsb": "{{inputs.parameters.resource_vsb}}", "product_id": "{{inputs.parameters.product_id}}",
                   "service_owner": "{{workflow.parameters.service_owner}}", "service_id": "{{workflow.parameters.service_id}}",
-                  "resource_owner": "{{inputs.parameters.resource_owner}}",
-                  "category": "{{workflow.parameters.category}}", "qos_parameters": {{workflow.parameters.qos_parameters}},
+                  "resource_owner": "{{inputs.parameters.resource_owner}}", "qos_parameters": {{workflow.parameters.qos_parameters}},
                   "sla_id": "{{inputs.parameters.sla_id}}" }
             - name: kafka_topic
               value: "issm-in-{{inputs.parameters.resource_owner}}"
