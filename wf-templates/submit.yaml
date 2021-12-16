@@ -180,7 +180,6 @@ spec:
         import urllib
         import urllib.parse
 
-        requested_price = str("{{inputs.parameters.requested_price}}")
         price = requested_price.split('-')[0]
         headers = {'Content-Type': 'application/json'}
         intent_query = urllib.parse.quote('{{inputs.parameters.intent_query}}')
