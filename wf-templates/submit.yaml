@@ -99,7 +99,7 @@ spec:
           - name: json_str
             value: "{{inputs.parameters.best_offer}}"
           - name: jq_query
-            value: '.productSpecification.relatedParty[0].name'
+            value: '.offer_object.productSpecification.relatedParty[0].name'
 
       - name: process-mno-name
         dependencies: [resource-service-owner]
@@ -120,7 +120,7 @@ spec:
           - name: json_str
             value: "{{inputs.parameters.best_offer}}"
           - name: jq_query
-            value: '.Blueprint_name'
+            value: '.offer_object.Blueprint_name'
 
       - name: product-id
         templateRef:
@@ -131,10 +131,22 @@ spec:
           - name: json_str
             value: "{{inputs.parameters.best_offer}}"
           - name: jq_query
-            value: '.product_id'
+            value: '.offer_object.product_id'
+
+      - name: sla-id
+        templateRef:
+          name: workflow-base
+          template: jq-script
+        arguments:
+          parameters:
+          - name: json_str
+            value: "{{inputs.parameters.best_offer}}"
+          - name: jq_query
+            value: '.offer_object.serviceLevelAgreement.id'
+
 
       - name: acquire
-        dependencies: [process-mno-name, resource-vsb, product-id]
+        dependencies: [process-mno-name, resource-vsb, product-id, sla-id]
         # invokes acquire template for every entry in resources list
         # waits for them to succeed and publishes status success for the
         # service owner to consume
@@ -155,6 +167,9 @@ spec:
             value: "{{tasks.resource-vsb.outputs.result}}"
           - name: product_id
             value: "{{tasks.product-id.outputs.result}}"
+          - name: sla_id
+            value: "{{tasks.sla-id.outputs.result}}"
+            
 
   - name: srds-service
     inputs:
@@ -174,16 +189,17 @@ spec:
         import json
         import requests
         import sys
+        import urllib
+        import urllib.parse
+
         requested_price = str("{{inputs.parameters.requested_price}}")
         price = requested_price.split('-')[0]
         headers = {'Content-Type': 'application/json'}
-        # category: vnf
-        # resourceSpecCharacteristic: CDN
-        r = requests.get("http://{{inputs.parameters.service_ip}}:{{inputs.parameters.service_port}}/discoveroffer/"
-            "{{inputs.parameters.category}}_lat{{inputs.parameters.latitude}}_long{{inputs.parameters.longitude}}_" + str(price) + "_{{inputs.parameters.resourceSpecCharacteristic}}",
-            headers=headers)
+        intent_query = urllib.parse.quote('3 CORES 12288 mb of RAM edge')
+        r = requests.get("http://{{inputs.parameters.service_ip}}:{{inputs.parameters.service_port}}/intent/" + intent_query, headers=headers)
         # return offers
-        json.dump(r.json(), sys.stdout)
+        # TODO: workshop HACK
+        json.dump([r.json()[5]], sys.stdout)
 
   - name: acquire
     # acquire is devided into two sub-tasks:
@@ -237,6 +253,7 @@ spec:
       - name: resource_owner
       - name: resource_vsb
       - name: product_id
+      - name: sla_id
     steps:
       - - name: event-uuid
           templateRef:
@@ -255,6 +272,7 @@ spec:
                   "resource_vsb": "{{inputs.parameters.resource_vsb}}", "product_id": "{{inputs.parameters.product_id}}",
                   "service_owner": "{{workflow.parameters.service_owner}}", "service_id": "{{workflow.parameters.service_id}}",
                   "resource_owner": "{{inputs.parameters.resource_owner}}",
-                  "category": "{{workflow.parameters.category}}", "qos_parameters": {{workflow.parameters.qos_parameters}} }
+                  "category": "{{workflow.parameters.category}}", "qos_parameters": {{workflow.parameters.qos_parameters}},
+                  "sla_id": "{{inputs.parameters.sla_id}}" }
             - name: kafka_topic
               value: "issm-in-{{inputs.parameters.resource_owner}}"

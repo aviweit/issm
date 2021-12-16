@@ -86,7 +86,7 @@ spec:
                   - name: discovery_ip
                     value: 172.28.3.42
                   - name: discovery_port
-                    value: 32000
+                    value: 32068
 
                   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                   # Slicer service
@@ -160,6 +160,8 @@ spec:
                   - name: resource_vsb
                     value: OVERRIDE
 
+                  - name: sla_id
+                    value: OVERRIDE
 
                 templates:
                 - name: handlerequest
@@ -289,3 +291,9 @@ spec:
                 dataKey: body.resource_vsb
                 value: DEFAULT
               dest: spec.arguments.parameters.23.value
+
+            - src:
+                dependencyName: test-dep
+                dataKey: body.sla_id
+                value: DEFAULT
+              dest: spec.arguments.parameters.24.value
